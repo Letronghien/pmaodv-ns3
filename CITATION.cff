@@ -1,0 +1,37 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the paper below and the original PMAODV paper."
+title: "PMAODV on ns-3: reproducibility package"
+type: software
+license: GPL-2.0-only
+repository-code: "https://github.com/Letronghien/pmaodv-ns3"
+authors:
+  - family-names: Le
+    given-names: Trong-Hien
+    email: letronghien@iuh.edu.vn
+    affiliation: "Industrial University of Ho Chi Minh City, Quang Ngai Campus"
+preferred-citation:
+  type: article
+  title: "Re-evaluating the reproducibility of PMAODV performance on NS-3 for FANETs: a comparison with AODV, AOMDV and DSDV"
+  authors:
+    - family-names: Le
+      given-names: Trong-Hien
+  journal: "The University of Danang - Journal of Science and Technology"
+  status: submitted
+references:
+  - type: conference-paper
+    title: "Probabilistic Multipath Ad-hoc Routing Protocol for the Internet of Things based Applications"
+    authors:
+      - family-names: Le
+        given-names: Trong-Hien
+      - family-names: Tran Thi-Minh
+        given-names: Khoa
+      - family-names: Ngo
+        given-names: Huu-Dung
+    collection-title: "Intelligent Aerial Access and Applications towards 6G and Beyond"
+    series: "Lecture Notes in Networks and Systems, vol. 1782"
+    publisher:
+      name: Springer
+    year: 2026
+    start: 287
+    end: 299
+    doi: "10.1007/978-3-032-14935-0_22"

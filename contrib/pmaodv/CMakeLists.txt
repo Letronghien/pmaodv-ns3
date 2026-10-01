@@ -1,0 +1,27 @@
+build_lib(
+  LIBNAME pmaodv
+  SOURCE_FILES
+    helper/pmaodv-helper.cc
+    model/pmaodv-dpd.cc
+    model/pmaodv-id-cache.cc
+    model/pmaodv-neighbor.cc
+    model/pmaodv-packet.cc
+    model/pmaodv-routing-protocol.cc
+    model/pmaodv-rqueue.cc
+    model/pmaodv-rtable.cc
+    model/pmaodv-multipath-table.cc
+  HEADER_FILES
+    helper/pmaodv-helper.h
+    model/pmaodv-dpd.h
+    model/pmaodv-id-cache.h
+    model/pmaodv-neighbor.h
+    model/pmaodv-packet.h
+    model/pmaodv-routing-protocol.h
+    model/pmaodv-rqueue.h
+    model/pmaodv-rtable.h
+    model/pmaodv-multipath-table.h
+  LIBRARIES_TO_LINK
+    ${libapplications}
+    ${libinternet-apps}
+    ${libwifi}
+)
