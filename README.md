@@ -37,7 +37,8 @@ docs/IMPLEMENTATION_NOTES.md   implementation details and deviations
 Tested on Ubuntu 24.04, GCC 13, CMake ≥ 3.20, Python 3.10+.
 
 ```bash
-sudo apt-get install -y git g++ cmake ninja-build python3-venv   # usually already present
+sudo apt-get install -y git g++ cmake ninja-build python3-venv
+# on Ubuntu 24.04 python3-venv may also require: sudo apt install -y python3.12-venv
 
 git clone https://github.com/Letronghien/pmaodv-ns3.git ~/pmaodv-repocd1
 cd ~/pmaodv-repocd1

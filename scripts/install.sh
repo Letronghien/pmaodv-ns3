@@ -73,9 +73,18 @@ EXEC="$NS3_DIR/build/scratch/ns$NS3_VERSION-$SIM_NAME-optimized"
 # ---------------------------------------------------------------- 4. python venv
 if [ "$SKIP_VENV" != "1" ]; then
     say "[4/5] Python environment $REPO_DIR/.venv"
-    [ -d "$REPO_DIR/.venv" ] || python3 -m venv "$REPO_DIR/.venv"
-    "$REPO_DIR/.venv/bin/pip" install -q --upgrade pip
-    "$REPO_DIR/.venv/bin/pip" install -q -r "$REPO_DIR/requirements.txt"
+    # a half-created .venv (e.g. after a failed attempt) has no pip: recreate it
+    [ -x "$REPO_DIR/.venv/bin/pip" ] || rm -rf "$REPO_DIR/.venv"
+    if [ -d "$REPO_DIR/.venv" ] || python3 -m venv "$REPO_DIR/.venv"; then
+        "$REPO_DIR/.venv/bin/pip" install -q --upgrade pip
+        "$REPO_DIR/.venv/bin/pip" install -q -r "$REPO_DIR/requirements.txt"
+    else
+        rm -rf "$REPO_DIR/.venv"
+        PYV=$(python3 -c 'import sys; print(f"{sys.version_info[0]}.{sys.version_info[1]}")')
+        echo "WARNING: could not create .venv (package python$PYV-venv missing)."
+        echo "         The simulator is built; only the analysis needs Python. Fix later with:"
+        echo "           sudo apt install -y python$PYV-venv && bash $0"
+    fi
 else
     say "[4/5] Python environment skipped"
 fi
