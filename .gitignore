@@ -1,5 +1,8 @@
-# local simulation output (copy final datasets into data/)
-results/
+# per-run files of a batch (only all-runs.csv, manifest.txt and analysis/ are published)
+data/**/runs/*/runs/
+data/**/runs/*/logs/
+data/**/runs/*/joblist.txt
+.venv/
 __pycache__/
 *.pyc
 .DS_Store

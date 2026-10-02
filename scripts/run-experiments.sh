@@ -12,18 +12,23 @@
 # DEFAULT_FLOWS=0 means every UAV 1..N-1 sends to UAV 0 (see README, "Traffic").
 #
 #   tmux new -s pmaodv
-#   NS3_DIR=~/pmaodv-ns3-sim/ns-3.48 bash scripts/run-experiments.sh
+#   bash scripts/run-experiments.sh
 #   SCENARIOS=default NODES="5 10 15 20" SEEDS=3 bash scripts/run-experiments.sh   # quick test
+#   JOBS=4 NICE=10 bash scripts/run-experiments.sh   # if other projects run at the same time
 #
+# Defaults use all CPU cores (JOBS = nproc, NICE = 0). Each run is wrapped in
+# `timeout --kill-after=30 RUN_TIMEOUT`.
 # Re-running with the same OUT directory resumes: finished runs are skipped.
 set -euo pipefail
 
 REPO_DIR=$(cd "$(dirname "$0")/.." && pwd)
-NS3_DIR="${NS3_DIR:-$HOME/pmaodv-ns3-sim/ns-3.48}"
-EXEC="${EXEC:-$NS3_DIR/fanet-sim}"
+NS3_DIR="${NS3_DIR:-$HOME/pmaodv-fanet/ns-3-pmaodv}"
+EXEC="${EXEC:-$NS3_DIR/build/scratch/ns3.48-pmaodv-sim-optimized}"
 [ -x "$EXEC" ] || { echo "ERROR: $EXEC not found - run scripts/install.sh first"; exit 1; }
 
-JOBS="${JOBS:-$(( $(nproc) > 1 ? $(nproc) - 1 : 1 ))}"
+JOBS="${JOBS:-$(nproc)}"
+NICE="${NICE:-0}"
+RUN_TIMEOUT="${RUN_TIMEOUT:-3600}"
 SEEDS="${SEEDS:-20}"
 DENSITY_SEEDS="${DENSITY_SEEDS:-10}"
 SIM_TIME="${SIM_TIME:-200}"
@@ -33,7 +38,7 @@ DEFAULT_FLOWS="${DEFAULT_FLOWS:-0}"
 MULTICAST_RREP="${MULTICAST_RREP:-0}"
 SCENARIOS="${SCENARIOS:-default multi-flow stress-mob stress-load stress-all density}"
 VARIANTS="${VARIANTS:-AODV:1 DSDV:1 AOMDV:3 PMAODV:2 PMAODV:3 PMAODV:4}"   # PROTOCOL:maxPaths
-OUT="${OUT:-$REPO_DIR/results/run-$(date +%Y%m%d-%H%M%S)}"
+OUT="${OUT:-$REPO_DIR/data/ns-3.48/runs/run-$(date +%Y%m%d-%H%M%S)}"
 
 mkdir -p "$OUT/runs" "$OUT/logs"
 JOBLIST="$OUT/joblist.txt"
@@ -92,13 +97,16 @@ done
 TOTAL=$(wc -l < "$JOBLIST")
 echo "executable : $EXEC"
 echo "output     : $OUT"
-echo "runs to do : $TOTAL (parallel jobs: $JOBS)"
+echo "runs to do : $TOTAL (parallel jobs: $JOBS, nice $NICE, timeout ${RUN_TIMEOUT}s)"
 
-export EXEC OUT
+export EXEC OUT NICE RUN_TIMEOUT
 run_job() {
     local id=$1; shift
-    if ! "$EXEC" "$@" > "$OUT/logs/$id.log" 2>&1; then
-        echo "$id exit=$?" >> "$OUT/failed.txt"
+    local rc=0
+    nice -n "$NICE" timeout --kill-after=30 "$RUN_TIMEOUT" "$EXEC" "$@" \
+        > "$OUT/logs/$id.log" 2>&1 || rc=$?
+    if [ "$rc" -ne 0 ]; then
+        echo "$id exit=$rc" >> "$OUT/failed.txt"     # 124 = timeout
         rm -f "$OUT/runs/$id.csv"
     fi
 }
@@ -116,4 +124,5 @@ if [ -n "$first" ]; then
     echo "merged     : $MERGED ($(($(wc -l < "$MERGED") - 1)) rows)"
 fi
 [ -f "$OUT/failed.txt" ] && echo "FAILED     : $(wc -l < "$OUT/failed.txt") runs, see $OUT/failed.txt"
-echo "analysis   : python3 $REPO_DIR/scripts/analyze.py $MERGED --outdir $OUT/analysis"
+PY="$REPO_DIR/.venv/bin/python"; [ -x "$PY" ] || PY=python3
+echo "analysis   : $PY $REPO_DIR/scripts/analyze.py $MERGED --outdir $OUT/analysis"
