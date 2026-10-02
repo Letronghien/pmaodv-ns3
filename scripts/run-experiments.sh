@@ -117,7 +117,8 @@ if [ "$TOTAL" -gt 0 ]; then
 fi
 
 MERGED="$OUT/all-runs.csv"
-first=$(find "$OUT/runs" -name '*.csv' | sort | head -1)
+# (no "| head" here: with pipefail, SIGPIPE in a long pipeline would abort the script)
+first=$(find "$OUT/runs" -name '*.csv' -print -quit)
 if [ -n "$first" ]; then
     head -1 "$first" > "$MERGED"
     find "$OUT/runs" -name '*.csv' | sort | while read -r f; do tail -n +2 "$f"; done >> "$MERGED"
